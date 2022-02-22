@@ -66,7 +66,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ inputs.AZURE_APPSERVICE_NAME }}
-          slot-name: Production   # TODO fix slot naming
+          slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_APPSERVICE_PUBLISH_PROFILE }}
           package: archive.zip
 
