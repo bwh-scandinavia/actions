@@ -58,7 +58,7 @@ jobs:
 
       - name: Create deployment package
         run: |
-          zip -r archive.zip . -x .git
+          zip -r archive.zip . -x '*.git*'
 
       # TODO: deployment slots and swapping
       - name: Deploy Azure Functions (${{ inputs.ENVIRONMENT }})
