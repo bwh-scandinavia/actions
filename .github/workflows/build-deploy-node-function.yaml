@@ -1,0 +1,76 @@
+name: Build & Deploy
+
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        required: true
+        type: string
+      NODE_VERSION:
+        required: true
+        type: string
+      SLACK_CHANNEL:
+        required: false
+        type: string
+        default: "#github-builds"
+      AZURE_FUNCTIONAPP_NAME:
+        required: true
+        type: string
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: false
+      AZURE_FUNCTIONAPP_PUBLISH_PROFILE:
+        required: true
+
+jobs:
+  build-deploy:
+    name: Build & Deploy to ${{ inputs.ENVIRONMENT }}
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+          channel: '${{ inputs.SLACK_CHANNEL }}'
+          message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
+        if: always()
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Initialize Node
+        uses: actions/setup-node@v2
+        with:
+          always-auth: true
+          node-version: ${{ inputs.NODE_VERSION }}
+          scope: "@bwh-scandinavia"
+
+      - name: Security audit
+        run: npm audit
+
+      - name: Install & Build
+        run: |
+          npm ci --production
+          npm run build
+          npm run test --if-present
+
+      - name: Create deployment package
+        run: |
+          zip -r archive.zip . -x .git
+
+      # TODO: deployment slots and swapping
+      - name: Deploy Azure Functions (${{ inputs.ENVIRONMENT }})
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.AZURE_FUNCTIONAPP_NAME }}
+          package: archive.zip
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '${{ inputs.SLACK_CHANNEL }}'
+        if: always()
