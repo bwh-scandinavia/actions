@@ -52,7 +52,7 @@ jobs:
 
       - name: Install & Build
         run: |
-          npm ci --production
+          npm ci
           npm run build
           npm run test --if-present
 
