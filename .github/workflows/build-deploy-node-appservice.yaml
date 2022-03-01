@@ -33,7 +33,7 @@ jobs:
       - uses: act10ns/slack@v1
         with:
           status: starting
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
           message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
         if: always()
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install & Build
         run: |
-          npm ci --production
+          npm ci
           npm run build
           npm run test --if-present
 
@@ -66,7 +66,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ inputs.AZURE_APPSERVICE_NAME }}
-          slot-name: 'Production'
+          slot-name: "Production"
           publish-profile: ${{ secrets.AZURE_APPSERVICE_PUBLISH_PROFILE }}
           package: archive.zip
 
@@ -74,5 +74,5 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
         if: always()
