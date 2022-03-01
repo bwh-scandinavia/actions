@@ -33,7 +33,7 @@ jobs:
       - uses: act10ns/slack@v1
         with:
           status: starting
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
           message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
         if: always()
 
@@ -54,7 +54,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm run test --if-present
+          # npm run test --if-present
 
       - name: Create deployment package
         run: |
@@ -72,5 +72,5 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
         if: always()
