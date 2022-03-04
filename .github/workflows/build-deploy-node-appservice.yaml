@@ -21,7 +21,7 @@ on:
         required: false
       AZURE_APPSERVICE_PUBLISH_PROFILE:
         required: true
-      BWH_PAT_READ_PACKAGES:
+      NODE_AUTH_TOKEN:
         required: true
 
 jobs:
@@ -54,7 +54,7 @@ jobs:
         run: |
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Security audit
         run: npm audit
