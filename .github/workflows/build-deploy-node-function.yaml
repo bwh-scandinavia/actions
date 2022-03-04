@@ -22,7 +22,7 @@ on:
       AZURE_FUNCTIONAPP_PUBLISH_PROFILE:
         required: true
       NODE_AUTH_TOKEN:
-        required: true
+        required: false
 
 jobs:
   build-deploy:
@@ -51,7 +51,11 @@ jobs:
 
       - name: Authenticate npm
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          if [[ -n "${NODE_AUTH_TOKEN}" ]]; then
+            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          else
+            echo "NODE_AUTH_TOKEN not provided, skipping npm auth"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
