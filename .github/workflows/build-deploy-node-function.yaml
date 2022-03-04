@@ -21,6 +21,8 @@ on:
         required: false
       AZURE_FUNCTIONAPP_PUBLISH_PROFILE:
         required: true
+      BWH_PAT_READ_PACKAGES:
+        required: true
 
 jobs:
   build-deploy:
@@ -46,6 +48,12 @@ jobs:
           always-auth: true
           node-version: ${{ inputs.NODE_VERSION }}
           scope: "@bwh-scandinavia"
+
+      - name: Authenticate npm
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 
       - name: Security audit
         run: npm audit
