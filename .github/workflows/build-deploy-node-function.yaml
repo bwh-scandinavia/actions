@@ -53,9 +53,11 @@ jobs:
         run: |
           if [[ -n "${NODE_AUTH_TOKEN}" ]]; then
             echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+            echo "NODE_AUTH_TOKEN has been added to .npmrc"
           else
             echo "NODE_AUTH_TOKEN not provided, skipping npm auth"
           fi
+          cat .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
