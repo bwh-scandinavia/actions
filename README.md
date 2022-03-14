@@ -6,9 +6,9 @@ Please note that this repository is _PUBLIC_ and no sensitive information shall 
 
 ## Reusable workflows:
 
-| workflow                            | language   | service    |
-|-------------------------------------|------------|------------|
-| build-deploy-node-function.yaml     | nodejs     | function   |
+| workflow                        | language | service  |
+| ------------------------------- | -------- | -------- |
+| build-deploy-node-function.yaml | nodejs   | function |
 
 
 ## Example usage:
@@ -37,4 +37,5 @@ jobs:
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
