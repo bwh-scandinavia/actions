@@ -11,7 +11,7 @@ Please note that this repository is _PUBLIC_ and no sensitive information shall 
 | build-deploy-node-function.yaml | nodejs   | function |
 
 
-## Example usage:
+## Example usage for function app:
 
 In your project repository, create your workflow thusly:
 
@@ -37,5 +37,34 @@ jobs:
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
+```
+
+## Example usage for app service:
+
+In your project repository, create your workflow thusly:
+
+```
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+    branches:
+      - main
+
+jobs:
+  build-deploy-test:
+    uses: bwh-scandinavia/actions/.github/workflows/build-deploy-node-appservice.yaml@main
+    with:
+      ENVIRONMENT: Test
+      NODE_VERSION: 16.x
+      AZURE_APPSERVICE_NAME: func-test-hotel-parser
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      AZURE_APPSERVICE_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
