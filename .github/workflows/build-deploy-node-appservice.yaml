@@ -69,7 +69,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          # npm run test --if-present
+          npm run test --if-present
 
       - name: Create deployment package
         run: |
