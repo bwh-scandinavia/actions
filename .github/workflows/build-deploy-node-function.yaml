@@ -69,6 +69,7 @@ jobs:
           npm ci
           npm run build
           npm run test --if-present
+          npm prune --production
 
       - name: Create deployment package
         run: |
