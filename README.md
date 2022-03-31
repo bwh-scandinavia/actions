@@ -33,10 +33,10 @@ jobs:
     with:
       ENVIRONMENT: Test
       NODE_VERSION: 16.x
-      AZURE_FUNCTIONAPP_NAME: func-test-hotel-parser
+      AZURE_FUNCTIONAPP_NAME: func-test-something
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_TEST }}
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
 
@@ -62,9 +62,10 @@ jobs:
     with:
       ENVIRONMENT: Test
       NODE_VERSION: 16.x
-      AZURE_APPSERVICE_NAME: func-test-hotel-parser
+      AZURE_APPSERVICE_NAME: app-test-something
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      AZURE_APPSERVICE_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      AZURE_APPSERVICE_PUBLISH_PROFILE: ${{ secrets.AZURE_APPSERVICE_PUBLISH_PROFILE_TEST }}
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
+
