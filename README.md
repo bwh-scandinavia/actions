@@ -23,6 +23,7 @@ on:
   push:
     branches:
       - main
+      - production
 
   workflow_dispatch:
     branches:
@@ -71,6 +72,7 @@ on:
   workflow_dispatch:
     branches:
       - main
+      - production
 
 jobs:
   build-deploy-test:
