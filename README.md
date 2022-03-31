@@ -6,9 +6,10 @@ Please note that this repository is _PUBLIC_ and no sensitive information shall 
 
 ## Reusable workflows:
 
-| workflow                        | language | service  |
-| ------------------------------- | -------- | -------- |
-| build-deploy-node-function.yaml | nodejs   | function |
+| workflow                          | language | service      |
+| --------------------------------- | -------- | ------------ |
+| build-deploy-node-appservice.yaml | nodejs   | app service  |
+| build-deploy-node-function.yaml   | nodejs   | function app |
 
 
 ## Example usage for function app:
@@ -26,9 +27,11 @@ on:
   workflow_dispatch:
     branches:
       - main
+      - production
 
 jobs:
   build-deploy-test:
+    if: ${{ github.ref == 'refs/heads/main' }}
     uses: bwh-scandinavia/actions/.github/workflows/build-deploy-node-function.yaml@main
     with:
       ENVIRONMENT: Test
@@ -37,6 +40,18 @@ jobs:
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_TEST }}
+      NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
+
+  build-deploy-prod:
+    if: ${{ github.ref == 'refs/heads/production' }}
+    uses: bwh-scandinavia/actions/.github/workflows/build-deploy-node-function.yaml@main
+    with:
+      ENVIRONMENT: Prod
+      NODE_VERSION: 16.x
+      AZURE_FUNCTIONAPP_NAME: func-prod-something
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      AZURE_FUNCTIONAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_PROD }}
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
 
@@ -51,6 +66,7 @@ on:
   push:
     branches:
       - main
+      - production
 
   workflow_dispatch:
     branches:
@@ -58,6 +74,7 @@ on:
 
 jobs:
   build-deploy-test:
+    if: ${{ github.ref == 'refs/heads/main' }}
     uses: bwh-scandinavia/actions/.github/workflows/build-deploy-node-appservice.yaml@main
     with:
       ENVIRONMENT: Test
@@ -66,6 +83,18 @@ jobs:
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       AZURE_APPSERVICE_PUBLISH_PROFILE: ${{ secrets.AZURE_APPSERVICE_PUBLISH_PROFILE_TEST }}
+      NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
+
+  build-deploy-prod:
+    if: ${{ github.ref == 'refs/heads/production' }}
+    uses: bwh-scandinavia/actions/.github/workflows/build-deploy-node-appservice.yaml@main
+    with:
+      ENVIRONMENT: Prod
+      NODE_VERSION: 16.x
+      AZURE_APPSERVICE_NAME: app-prod-something
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      AZURE_APPSERVICE_PUBLISH_PROFILE: ${{ secrets.AZURE_APPSERVICE_PUBLISH_PROFILE_PROD }}
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
 
