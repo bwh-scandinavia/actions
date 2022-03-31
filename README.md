@@ -69,3 +69,16 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.BWH_PAT_READ_PACKAGES }}
 ```
 
+
+## Configuration
+
+These resuable workflows need some variables/secrets. For example, posting to slack requires the `SLACK_WEBHOOK_URL`. [Organization secrets](https://github.com/organizations/bwh-scandinavia/settings/secrets/actions) are created at the organization level and are available to all repositories in the organization.
+
+| variable | type | description |
+|----------|------|-------------|
+| `SLACK_WEBHOOK_URL` | organization secret | ["Incoming webhook" Slack app](https://bestwesternnewweb.slack.com/services/B034Q4EDTT2), configured to post workflow action status to a specific channel |
+| `BWH_PAT_READ_PACKAGES` | organization secret | Personal access token that gives a repository access to packages from other repositories, for example it is used when a project needs to run `npm install` and include the shared `@bwh-scandinavia/types` npm package, which is in another repository. The default `GITHUB_TOKEN` in the workflow does not have access to other repositories than the current repository, so an auth token is needed to access these packages. Create a PAT with the `read:packages` scope and give it a reasonable expiration date. |
+| `AZURE_APPSERVICE_PUBLISH_PROFILE_TEST` | specific to repository | The Azure Publish Profile for the app service for the test environment. Currently manually copy-pasted from Azure Portal to Github. An automatic connection via Terraform would be nice, [though not currently easily possible.](https://github.com/hashicorp/terraform-provider-azurerm/issues/8739) |
+| `AZURE_APPSERVICE_PUBLISH_PROFILE_PROD` | specific to repository | The Azure Publish Profile for the app service for the production environment. |
+| `AZURE_FUNCTIONAPP_PUBLISH_PROFILE_TEST` | specific to repository | The Azure Publish Profile for the function app for the test environment. |
+| `AZURE_FUNCTIONAPP_PUBLISH_PROFILE_PROD` | specific to repository | The Azure Publish Profile for the function app for the production environment. |
