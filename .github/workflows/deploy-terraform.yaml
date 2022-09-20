@@ -1,0 +1,96 @@
+name: 'Deploy Terraform'
+
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        type: string
+        required: true
+      TERRAFORM_FOLDER:
+        type: string
+        required: true
+      TERRAFORM_VERSION:
+        type: string
+        required: true
+      APPLY:
+        type: boolean
+        default: false
+      REQUIRE_APPROVAL:
+        type: boolean
+        default: true
+      AZURE_SUBSCRIPTION_ID:
+        type: string
+        required: false
+      AZURE_TENANT_ID:
+        type: string
+        required: false
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_CLIENT_SECRET:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+
+jobs:
+  plan_apply:
+    name: 'Plan and Apply'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+    concurrency: ${{ github.workflow }}-${{ inputs.ENVIRONMENT }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.TERRAFORM_FOLDER }}
+
+    steps:
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+          message: Terraforming ${{ inputs.ENVIRONMENT }}
+        if: always()
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ inputs.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out "terraform.plan"
+
+      - name: Show Terraform Plan
+        run: terraform show terraform.plan
+
+      - uses: trstringer/manual-approval@v1
+        if: ${{ inputs.APPLY && inputs.REQUIRE_APPROVAL }}
+        timeout-minutes: 30
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: ${{ github.actor }}
+          minimum-approvals: 1
+          issue-title: 'Deploying to ${{ inputs.ENVIRONMENT }}'
+
+      - name: Terraform Apply
+        if: ${{ inputs.APPLY }}
+        run: terraform apply -input=false -auto-approve "terraform.plan"
+
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+        if: always()
