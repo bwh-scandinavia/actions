@@ -76,6 +76,13 @@ jobs:
       - name: Show Terraform Plan
         run: terraform show terraform.plan
 
+      - uses: act10ns/slack@v1
+        with:
+          status: action_required
+          message: Needs human intervention in {{ env.GITHUB_SERVER_URL }}/{{ env.GITHUB_REPOSITORY }}/actions/runs/{{ env.GITHUB_RUN_ID }}
+          steps: ${{ toJson(steps) }}
+        if: ${{ inputs.APPLY && inputs.REQUIRE_APPROVAL }}
+
       - uses: trstringer/manual-approval@v1
         if: ${{ inputs.APPLY && inputs.REQUIRE_APPROVAL }}
         timeout-minutes: 30
