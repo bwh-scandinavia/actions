@@ -23,7 +23,7 @@ on:
       AZURE_TENANT_ID:
         type: string
         required: false
-        default: "3355f402-0421-407d-91a8-9927ca0743d6"
+        default: '3355f402-0421-407d-91a8-9927ca0743d6'
     secrets:
       SLACK_WEBHOOK_URL:
         required: false
@@ -54,9 +54,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: debug
-        run: env | sort
 
       - name: Initialize Node
         uses: actions/setup-node@v2
@@ -96,11 +93,8 @@ jobs:
           allow-no-subscriptions: true
           creds: '{"clientId":"${{ secrets.APP_DEPLOYMENT_CLIENT_ID }}","clientSecret":"${{ secrets.APP_DEPLOYMENT_CLIENT_SECRET }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
 
-      - run: az account set -s $ENVIRONMENT
-
-      - run: az account show
-      
-      - run: az account list
+      - name: Set subscription to ${{ inputs.ENVIRONMENT }}
+        run: az account set -s $ENVIRONMENT
 
       # TODO: deployment slots and swapping
       - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
