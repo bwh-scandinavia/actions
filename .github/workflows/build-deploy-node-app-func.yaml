@@ -95,6 +95,10 @@ jobs:
           allow-no-subscriptions: true
           creds: '{"clientId":"${{ secrets.APP_DEPLOYMENT_CLIENT_ID }}","clientSecret":"${{ secrets.APP_DEPLOYMENT_CLIENT_SECRET }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
 
+      - run: az account show
+      
+      - run: az account list
+
       # TODO: deployment slots and swapping
       - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
         if: ${{ inputs.TYPE == 'appservice' }}
