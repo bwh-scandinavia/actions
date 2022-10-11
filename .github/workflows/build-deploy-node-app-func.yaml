@@ -1,0 +1,121 @@
+name: Build & Deploy
+
+on:
+  workflow_call:
+    inputs:
+      APP_TYPE:
+        description: 'Must be "appservice" or "function"'
+        required: true
+        type: string
+      ENVIRONMENT:
+        required: true
+        type: string
+      NODE_VERSION:
+        required: true
+        type: string
+      SLACK_CHANNEL:
+        required: false
+        type: string
+        default: '#github-builds'
+      APP_NAME:
+        required: true
+        type: string
+      AZURE_TENANT_ID:
+        type: string
+        required: false
+        default: "3355f402-0421-407d-91a8-9927ca0743d6"
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: false
+      NODE_AUTH_TOKEN:
+        required: false
+      APP_DEPLOYMENT_CLIENT_ID:
+        required: true
+      APP_DEPLOYMENT_CLIENT_SECRET:
+        required: true
+
+jobs:
+  build-deploy:
+    name: Build & Deploy to ${{ inputs.ENVIRONMENT }}
+    environment: ${{ inputs.ENVIRONMENT }}
+    concurrency: ${{ github.workflow }}-${{ inputs.ENVIRONMENT }}
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+          channel: '${{ inputs.SLACK_CHANNEL }}'
+          message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
+        if: always()
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: debug
+        run: env | sort
+
+      - name: Initialize Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+
+      - name: Authenticate npm
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN}" ]]; then
+            echo "" >> .npmrc
+            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+            echo "NODE_AUTH_TOKEN has been added to .npmrc"
+          else
+            echo "NODE_AUTH_TOKEN not provided, skipping npm auth"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Security audit
+        run: npm audit
+
+      - name: Install & Build
+        run: |
+          npm ci
+          npm run build
+          npm run test --if-present
+          npm run lint --if-present
+          npm prune --production
+
+      - name: Create deployment package
+        run: |
+          zip -r archive.zip . -x '*.git*'
+
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          allow-no-subscriptions: true
+          creds: '{"clientId":"${{ secrets.APP_DEPLOYMENT_CLIENT_ID }}","clientSecret":"${{ secrets.APP_DEPLOYMENT_CLIENT_SECRET }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
+
+      # TODO: deployment slots and swapping
+      - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
+        if: ${{ inputs.APP_TYPE == 'appservice' }}
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ inputs.APP_NAME }}
+          slot-name: 'Production'
+          package: archive.zip
+
+      - name: Deploy Azure Functions (${{ inputs.ENVIRONMENT }})
+        if: ${{ inputs.APP_TYPE == 'function' }}
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.APP_NAME }}
+          slot-name: 'Production'
+          package: archive.zip
+
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '${{ inputs.SLACK_CHANNEL }}'
+        if: always()
