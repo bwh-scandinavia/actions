@@ -97,7 +97,7 @@ jobs:
 
       - name: Create deployment package
         run: |
-          zip -r archive.zip build/** dist/** node_modules/** package*json config/** -x '*.git*'
+          zip -r archive.zip build/** dist/** node_modules/**/** package*json config/** -x '*.git*'
 
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
