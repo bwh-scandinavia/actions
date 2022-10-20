@@ -3,6 +3,10 @@ name: Experimental Build
 on:
   workflow_call:
     inputs:
+      SKIP_DEPLOY:
+        required: false
+        default: false
+        type: boolean
       TYPE:
         required: false
         default: "none"
@@ -47,7 +51,6 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
-      PUBLIC_ORIGIN: "Temporary-set-this"
 
     steps:
       - uses: act10ns/slack@v1
