@@ -1,12 +1,12 @@
-name: Experimental Build
+name: Build & Deploy Appservice
 
 on:
   workflow_call:
     inputs:
-      TYPE:
+      SKIP_DEPLOY:
         required: false
-        default: "none"
-        type: string
+        default: false
+        type: boolean
       ENVIRONMENT:
         required: true
         type: string
@@ -16,7 +16,7 @@ on:
       SLACK_CHANNEL:
         required: false
         type: string
-        default: '#github-builds-exp'
+        default: '#github-builds'
       APP_NAME:
         required: true
         type: string
@@ -41,7 +41,7 @@ on:
 jobs:
   build-deploy:
     name: Build & Deploy to ${{ inputs.ENVIRONMENT }}
-    # environment: ${{ inputs.ENVIRONMENT }}
+    environment: ${{ inputs.ENVIRONMENT }}
     concurrency: ${{ github.workflow }}-${{ inputs.ENVIRONMENT }}
     runs-on: ubuntu-latest
     env:
@@ -58,6 +58,13 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Expand ENV variables from input
+        if: ${{ inputs.ENV != '' }}
+        run: echo "$ENV" | sed -z 's/:\ /=/g' >> $GITHUB_ENV
+        env:
+          ENV: ${{ inputs.ENV }}
+
 
       - name: Initialize Node
         uses: actions/setup-node@v2
@@ -76,20 +83,30 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - name: Security audit
-        run: npm audit
-
-      - name: Install & Build
-        run: |
-          npm ci
-          npm run build
-          npm run test --if-present
-          npm run lint --if-present
-          npm prune --production
+      - run: npm audit
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm run build
+      - run: npm run test --if-present
+      - run: npm prune --production
 
       - name: Create deployment package
         run: |
-          zip -r archive.zip . -x '*.git*'
+          zip -r archive.zip \
+            build/** \
+            dist/** \
+            node_modules/**/** \
+            package.json \
+            config/** \
+            -x '*.git*'
+
+      # Remove me when all apps build fine
+      - name: Save ZIP as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: "zip ${{ inputs.APP_NAME }}"
+          path: archive.zip
+          retention-days: 1
 
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
@@ -100,29 +117,10 @@ jobs:
       - name: Set subscription to ${{ inputs.ENVIRONMENT }}
         run: az account set -s $ENVIRONMENT
 
-      - name: Save ZIP as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: "zip ${{ inputs.APP_NAME }}"
-          path: archive.zip
-
-
-
-
-
       # TODO: deployment slots and swapping
       - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
-        if: ${{ inputs.TYPE == 'appservice' }}
-        id: deploy-to-webapp
+        if: ${{ !inputs.SKIP_DEPLOY }}
         uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ inputs.APP_NAME }}
-          slot-name: 'Production'
-          package: archive.zip
-
-      - name: Deploy Azure Functions (${{ inputs.ENVIRONMENT }})
-        if: ${{ inputs.TYPE == 'function' }}
-        uses: Azure/functions-action@v1
         with:
           app-name: ${{ inputs.APP_NAME }}
           slot-name: 'Production'

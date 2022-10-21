@@ -1,3 +1,5 @@
+# Renamed to build-deploy-node-appservice-publishprofile.yaml, keep this while workflows are still using it.
+
 name: Build & Deploy
 
 on:
