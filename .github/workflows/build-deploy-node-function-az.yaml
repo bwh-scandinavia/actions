@@ -1,4 +1,4 @@
-name: Build & Deploy Appservice
+name: Build & Deploy Function
 
 on:
   workflow_call:
@@ -24,10 +24,6 @@ on:
         type: string
         required: false
         default: '3355f402-0421-407d-91a8-9927ca0743d6'
-      ENV:
-        type: string
-        required: false
-        default: ''
     secrets:
       SLACK_WEBHOOK_URL:
         required: false
@@ -59,13 +55,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Expand ENV variables from input
-        if: ${{ inputs.ENV != '' }}
-        run: echo "$ENV" | sed -z 's/:\ /=/g' >> $GITHUB_ENV
-        env:
-          ENV: ${{ inputs.ENV }}
-
-
       - name: Initialize Node
         uses: actions/setup-node@v2
         with:
@@ -92,13 +81,7 @@ jobs:
 
       - name: Create deployment package
         run: |
-          zip -r archive.zip \
-            build/** \
-            dist/** \
-            node_modules/**/** \
-            package.json \
-            config/** \
-            -x '*.git*'
+          zip -r archive.zip . -x '*.git*'
 
       # Remove me when all apps build fine
       - name: Save ZIP as artifact
@@ -118,9 +101,9 @@ jobs:
         run: az account set -s $ENVIRONMENT
 
       # TODO: deployment slots and swapping
-      - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
+      - name: Deploy Azure Functions (${{ inputs.ENVIRONMENT }})
         if: ${{ !inputs.SKIP_DEPLOY }}
-        uses: azure/webapps-deploy@v2
+        uses: Azure/functions-action@v1
         with:
           app-name: ${{ inputs.APP_NAME }}
           slot-name: 'Production'
