@@ -81,7 +81,15 @@ jobs:
 
       - name: Create deployment package
         run: |
-          zip -r archive.zip . -x '*.git*'
+          zip -r archive.zip \
+            build/** \
+            dist/** \
+            node_modules/**/** \
+            package.json \
+            config/** \
+            host.json \
+            **/function.json \
+            -x '*.git*'
 
       # Remove me when all apps build fine
       - name: Save ZIP as artifact
