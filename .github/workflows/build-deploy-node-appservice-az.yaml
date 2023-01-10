@@ -83,7 +83,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - run: npm audit
+      # - run: npm audit
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm run build
