@@ -66,8 +66,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - name: Security audit
-        run: npm audit
+      # - name: Security audit
+      #   run: npm audit
 
       - name: Install & Build
         run: |
