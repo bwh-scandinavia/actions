@@ -119,7 +119,7 @@ jobs:
         run: az account set -s $ENVIRONMENT
 
       - name: Create Staging Swap Slot
-        run: az webapp deployment slot create --name $APP_NAME --resource-group $RESOURCE_GROUP --slot Staging
+        run: az webapp deployment slot create --name $APP_NAME --resource-group $RESOURCE_GROUP --slot Staging --configuration-source $APP_NAME
 
       - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
         if: ${{ !inputs.SKIP_DEPLOY }}
