@@ -88,7 +88,7 @@ jobs:
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm run build
-      # - run: npm run test --if-present
+      - run: npm run test --if-present
       - run: npm prune --production
 
       - name: Create deployment package
