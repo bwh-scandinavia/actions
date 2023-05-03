@@ -120,7 +120,7 @@ jobs:
       - name: Create Staging Swap Slot
         run: az functionapp deployment slot create --name $APP_NAME --resource-group $RESOURCE_GROUP --slot Staging --configuration-source $APP_NAME
 
-      - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
+      - name: Deploy Azure Function (${{ inputs.ENVIRONMENT }})
         if: ${{ !inputs.SKIP_DEPLOY }}
         uses: Azure/functions-action@v1
         with:
