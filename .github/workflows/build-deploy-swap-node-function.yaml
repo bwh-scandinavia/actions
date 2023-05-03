@@ -118,18 +118,18 @@ jobs:
         run: az account set -s $ENVIRONMENT
 
       - name: Create Staging Swap Slot
-        run: az webapp deployment slot create --name $APP_NAME --resource-group $RESOURCE_GROUP --slot Staging --configuration-source $APP_NAME
+        run: az functionapp deployment slot create --name $APP_NAME --resource-group $RESOURCE_GROUP --slot Staging --configuration-source $APP_NAME
 
       - name: Deploy Azure App Service (${{ inputs.ENVIRONMENT }})
         if: ${{ !inputs.SKIP_DEPLOY }}
-        uses: azure/webapps-deploy@v2
+        uses: Azure/functions-action@v1
         with:
           app-name: ${{ inputs.APP_NAME }}
           slot-name: "Staging"
           package: archive.zip
 
       - name: Swapperino
-        run: az webapp deployment slot swap --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME --target-slot Production
+        run: az functionapp deployment slot swap --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME --target-slot Production
 
       - name: Delete Staging Swap Slot
-        run: az webapp deployment slot delete --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME
+        run: az functionapp deployment slot delete --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME
