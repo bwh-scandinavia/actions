@@ -133,3 +133,10 @@ jobs:
 
       - name: Delete Staging Swap Slot
         run: az functionapp deployment slot delete --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME
+
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '${{ inputs.SLACK_CHANNEL }}'
+        if: always()

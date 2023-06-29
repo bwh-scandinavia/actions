@@ -58,6 +58,13 @@ jobs:
       APP_NAME: ${{ inputs.APP_NAME}}
       SLOT_NAME: ${{ inputs.SLOT_NAME}}
     steps:
+      - uses: act10ns/slack@v1
+        with:
+          status: starting
+          channel: "${{ inputs.SLACK_CHANNEL }}"
+          message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
+        if: always()
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -134,3 +141,10 @@ jobs:
 
       - name: Delete Staging Swap Slot
         run: az webapp deployment slot delete --name $APP_NAME --resource-group $RESOURCE_GROUP --slot $SLOT_NAME
+
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "${{ inputs.SLACK_CHANNEL }}"
+        if: always()
