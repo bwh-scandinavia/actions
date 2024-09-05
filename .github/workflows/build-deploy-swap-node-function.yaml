@@ -47,6 +47,7 @@ jobs:
     environment: ${{ inputs.ENVIRONMENT }}
     concurrency: ${{ github.workflow }}-${{ inputs.ENVIRONMENT }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
