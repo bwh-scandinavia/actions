@@ -92,9 +92,9 @@ jobs:
             **/function.json \
             -x '*.git*'
 
-      # Remove me when all apps build fine
+      # Remove me when all apps build fine - this seems to be used only for debugging purposes, the step can most likely be removed
       - name: Save ZIP as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "zip ${{ inputs.APP_NAME }}"
           path: archive.zip
