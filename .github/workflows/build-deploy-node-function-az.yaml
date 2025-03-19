@@ -16,14 +16,14 @@ on:
       SLACK_CHANNEL:
         required: false
         type: string
-        default: '#github-builds'
+        default: "#github-builds"
       APP_NAME:
         required: true
         type: string
       AZURE_TENANT_ID:
         type: string
         required: false
-        default: '3355f402-0421-407d-91a8-9927ca0743d6'
+        default: "3355f402-0421-407d-91a8-9927ca0743d6"
     secrets:
       SLACK_WEBHOOK_URL:
         required: false
@@ -49,7 +49,7 @@ jobs:
       - uses: act10ns/slack@v1
         with:
           status: starting
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
           message: Starting build & deploy to ${{ inputs.ENVIRONMENT }}
         if: always()
 
@@ -73,7 +73,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - run: npm audit
+      - name: Run npm audit
+        if: ${{ inputs.RUN_NPM_AUDIT != 'false' }}
+        run: npm audit
+
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm run build
@@ -100,7 +103,7 @@ jobs:
           path: archive.zip
           retention-days: 1
 
-      - name: 'Login via Azure CLI'
+      - name: "Login via Azure CLI"
         uses: azure/login@v1
         with:
           allow-no-subscriptions: true
@@ -115,12 +118,12 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ inputs.APP_NAME }}
-          slot-name: 'Production'
+          slot-name: "Production"
           package: archive.zip
 
       - uses: act10ns/slack@v1
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: '${{ inputs.SLACK_CHANNEL }}'
+          channel: "${{ inputs.SLACK_CHANNEL }}"
         if: always()
