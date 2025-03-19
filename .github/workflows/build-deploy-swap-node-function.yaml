@@ -3,6 +3,10 @@ name: Build & Deploy Function
 on:
   workflow_call:
     inputs:
+      RUN_NPM_AUDIT:
+        required: false
+        default: true
+        type: boolean
       SKIP_DEPLOY:
         required: false
         default: false
@@ -83,7 +87,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Run npm audit
-        if: ${{ inputs.RUN_NPM_AUDIT != 'false' }}
+        if: ${{ inputs.RUN_NPM_AUDIT }}
         run: npm audit
 
       - run: npm ci
