@@ -5,7 +5,7 @@ on:
     inputs:
       RUN_NPM_AUDIT:
         required: false
-        default: false
+        default: true
         type: boolean
       SKIP_DEPLOY:
         required: false
