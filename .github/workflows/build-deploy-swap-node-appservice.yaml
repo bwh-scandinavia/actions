@@ -98,7 +98,7 @@ jobs:
 
       - name: Run npm audit
         if: ${{ inputs.RUN_NPM_AUDIT }}
-        run: npm audit
+        run: npm audit --omit=dev
 
       - run: npm ci
       - run: npm run lint --if-present
